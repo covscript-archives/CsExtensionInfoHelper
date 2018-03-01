@@ -14,6 +14,39 @@ static jmethodID CsExtensionInfo_addExtensionData;
 static jmethodID AbstractExtensionData_setName;
 static jmethodID AbstractExtensionData_setNativeTypeName;
 
+static jobject new_ExtensionInfo(JNIEnv *env) {
+    return env->NewObject(com_imkiva_cshelper_CsExtensionInfo,
+                          CsExtensionInfo_new);
+}
+
+static jobject new_CallableInfo(JNIEnv *env) {
+    return env->NewObject(com_imkiva_cshelper_CsCallableInfo,
+                          CsCallableInfo_new);
+}
+
+static jobject new_VariableInfo(JNIEnv *env) {
+    return env->NewObject(com_imkiva_cshelper_CsVariableInfo,
+                          CsVariableInfo_new);
+}
+
+static void addExtensionData(JNIEnv *env, jobject extensionInfo, jobject extensionData) {
+    env->CallVoidMethod(extensionInfo, CsExtensionInfo_addExtensionData, extensionData);
+}
+
+static void setNameImpl(JNIEnv *env, jmethodID setNameMethod,
+                        jobject extensionData, const char *name) {
+    jstring jname = env->NewStringUTF(name);
+    env->CallVoidMethod(extensionData, setNameMethod, jname);
+}
+
+static void setName(JNIEnv *env, jobject extensionData, const char *name) {
+    setNameImpl(env, AbstractExtensionData_setName, extensionData, name);
+}
+
+static void setNativeTypeName(JNIEnv *env, jobject extensionData, const char *name) {
+    setNameImpl(env, AbstractExtensionData_setNativeTypeName, extensionData, name);
+}
+
 void parse_extension_info(const char *extensionPath) {
     cs::extension_holder ext(extensionPath);
     cs::domain_t domain = ext.get_domain();
@@ -58,10 +91,6 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
             "<init>",
             "()V");
 
-    CsCallableInfo_new = env->GetMethodID(
-            com_imkiva_cshelper_CsExtensionInfo,
-            "<init>",
-            "()V");
     CsExtensionInfo_addExtensionData = env->GetMethodID(
             com_imkiva_cshelper_CsExtensionInfo,
             "addExtensionData",
