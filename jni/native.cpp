@@ -30,6 +30,7 @@ Java_com_imkiva_cshelper_jni_CsExtensionHelper_getExtensionInfo(JNIEnv *env, jcl
 }
 
 jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+    ::vm = vm;
     JNIEnv *env = nullptr;
     if (vm->GetEnv((void **) &env, JNI_VERSION_1_6) != JNI_OK) {
         return JNI_ERR;
@@ -37,9 +38,12 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 
     com_imkiva_cshelper_AbstractExtensionData = env->FindClass(
             "com/imkiva/cshelper/AbstractExtensionData");
-    com_imkiva_cshelper_CsExtensionInfo = env->FindClass("com/imkiva/cshelper/CsExtensionInfo");
-    com_imkiva_cshelper_CsCallableInfo = env->FindClass("com/imkiva/cshelper/CsCallableInfo");
-    com_imkiva_cshelper_CsVariableInfo = env->FindClass("com/imkiva/cshelper/CsVariableInfo");
+    com_imkiva_cshelper_CsExtensionInfo = env->FindClass(
+            "com/imkiva/cshelper/CsExtensionInfo");
+    com_imkiva_cshelper_CsCallableInfo = env->FindClass(
+            "com/imkiva/cshelper/CsCallableInfo");
+    com_imkiva_cshelper_CsVariableInfo = env->FindClass(
+            "com/imkiva/cshelper/CsVariableInfo");
 
     CsCallableInfo_new = env->GetMethodID(
             com_imkiva_cshelper_CsExtensionInfo,
