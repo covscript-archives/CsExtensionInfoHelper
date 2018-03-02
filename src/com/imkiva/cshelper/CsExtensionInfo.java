@@ -1,7 +1,7 @@
 package com.imkiva.cshelper;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represent that this is a root-extension or a sub-extension.
@@ -10,10 +10,10 @@ import java.util.List;
  * @author kiva
  */
 public class CsExtensionInfo extends AbstractExtensionData {
-    private List<AbstractExtensionData> extensionData;
+    private Map<String, AbstractExtensionData> extensionData;
 
     public CsExtensionInfo() {
-        this.extensionData = new ArrayList<>();
+        this.extensionData = new HashMap<>();
     }
 
     /**
@@ -32,7 +32,7 @@ public class CsExtensionInfo extends AbstractExtensionData {
      *
      * @return all data
      */
-    public List<AbstractExtensionData> getExtensionData() {
+    public Map<String, AbstractExtensionData> getExtensionData() {
         return extensionData;
     }
 
@@ -43,6 +43,6 @@ public class CsExtensionInfo extends AbstractExtensionData {
      * @see com.imkiva.cshelper.jni.CsExtensionHelper#getExtensionInfo(String)
      */
     public void addExtensionData(AbstractExtensionData data) {
-        this.extensionData.add(data);
+        this.extensionData.put(data.getName(), data);
     }
 }
