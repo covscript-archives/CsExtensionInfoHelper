@@ -1,4 +1,4 @@
-#include <covscript/core.hpp>
+#include <covscript/extension.hpp>
 
 #include <jni.h>
 
@@ -47,19 +47,39 @@ static void setNativeTypeName(JNIEnv *env, jobject extensionData, const char *na
     setNameImpl(env, AbstractExtensionData_setNativeTypeName, extensionData, name);
 }
 
-void parse_extension_info(const char *extensionPath) {
+jobject parse_extension_info(JNIEnv *env, const cs::domain_t &domain) {
+    jobject csExtensionInfo = env->NewObject(com_imkiva_cshelper_CsExtensionInfo,
+                                             CsExtensionInfo_new);
+    for (auto &element : *domain) {
+        jobject data = nullptr;
+        if (element.second.type() == typeid(cs::callable)) {
+            data = new_CallableInfo(env);
+        } else if (element.second.type() == typeid(cs::extension_t)) {
+            const auto &sub_domain = element.second.const_val<cs::domain_t>();
+            data = parse_extension_info(env, sub_domain);
+        } else {
+            data = new_VariableInfo(env);
+        }
+        setName(env, data, element.first.c_str());
+        setNativeTypeName(env, data, element.second.get_type_name());
+        addExtensionData(env, csExtensionInfo, data);
+    }
+    return csExtensionInfo;
+}
+
+jobject parse_extension_info(JNIEnv *env, const char *extensionPath) {
     cs::extension_holder ext(extensionPath);
     cs::domain_t domain = ext.get_domain();
+    return parse_extension_info(env, domain);
 }
 
 JNIEXPORT jobject JNICALL
 Java_com_imkiva_cshelper_jni_CsExtensionHelper_getExtensionInfo(JNIEnv *env, jclass type,
                                                                 jstring extensionPath_) {
     const char *extensionPath = env->GetStringUTFChars(extensionPath_, 0);
-    jobject csExtensionInfo = env->NewObject(com_imkiva_cshelper_CsExtensionInfo,
-                                             CsExtensionInfo_new);
-    parse_extension_info(extensionPath);
+    jobject result = parse_extension_info(env, extensionPath);
     env->ReleaseStringUTFChars(extensionPath_, extensionPath);
+    return result;
 }
 
 jint JNI_OnLoad(JavaVM *vm, void *reserved) {
